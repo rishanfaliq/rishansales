@@ -113,7 +113,6 @@ public class enquiryController {
 
     return "redirect:/showEnquiry";
   }
-
   @RequestMapping(value = "/enquiryPlace", method = RequestMethod.GET)
   public ModelAndView productAdder() {
 

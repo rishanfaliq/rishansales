@@ -114,10 +114,6 @@ public class clients{
 	public void setEnq(Set<enquiry> enq) {
 		this.enq = enq;
 	}
-
-
-
-
     
     public clients() {
     }
