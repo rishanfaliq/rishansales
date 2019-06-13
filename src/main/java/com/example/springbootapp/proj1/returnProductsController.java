@@ -57,7 +57,7 @@ public class returnProductsController{
     
 
         @RequestMapping(value = "/returns", method = RequestMethod.POST)
-        public String submitdetails(@Valid @ModelAttribute("enquiryplace") enquiryPlace enquiryplace, 
+        public String saveReturns(@Valid @ModelAttribute("enquiryplace") enquiryPlace enquiryplace, 
           BindingResult result, ModelMap model) {
             if (result.hasErrors()) {
            

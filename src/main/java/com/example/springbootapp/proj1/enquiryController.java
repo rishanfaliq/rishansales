@@ -67,6 +67,12 @@ public class enquiryController {
 
   }
 
+  @RequestMapping(value = "/allenquiry", method = RequestMethod.GET)
+  public List<enquiry> showAllEnquiries() {
+    List<enquiry> enquiryList = enqrepo.findAll();
+    return enquiryList;
+  }
+
   @RequestMapping(value = "/addEnquiry", method = RequestMethod.POST)
   public String submit(@Valid @ModelAttribute("clientmodel") clientModel clientmodel, BindingResult result,
       ModelMap model) {
@@ -114,13 +120,13 @@ public class enquiryController {
     return "redirect:/showEnquiry";
   }
   @RequestMapping(value = "/enquiryPlace", method = RequestMethod.GET)
-  public ModelAndView productAdder() {
+  public ModelAndView displayEnquiries() {
 
     return new ModelAndView("enquiryAdd", "enquiryplace", new enquiryPlace());
   }
 
   @RequestMapping(value = "/placeEnquiries", method = RequestMethod.POST)
-  public String submitdetails(@Valid @ModelAttribute("enquiryplace") enquiryPlace enquiryplace, BindingResult result,
+  public String placeEnquiry(@Valid @ModelAttribute("enquiryplace") enquiryPlace enquiryplace, BindingResult result,
       ModelMap model) {
     if (result.hasErrors()) {
 

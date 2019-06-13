@@ -141,7 +141,7 @@ public class placeOrderController {
     }
 
     @RequestMapping(value = "/cancelOrder", method = RequestMethod.POST)
-    public String developerMethodcancel(@RequestParam("myField") int id) {
+    public String cancelOrder(@RequestParam("myField") int id) {
 
         List<orderitems> olist = ordrepo.getItems(id);
 
@@ -267,7 +267,7 @@ public class placeOrderController {
 
     
     @RequestMapping(value = "/deliveryDetails", method = RequestMethod.GET)
-    public ModelAndView placeOrders() {
+    public ModelAndView viewPlaceOrder() {
         return new ModelAndView("delivery", "deliverymodel", new deliveryModel());
     }
 
