@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
@@ -67,11 +68,15 @@ public class enquiryController {
 
   }
 
-  @RequestMapping(value = "/allenquiry", method = RequestMethod.GET)
-  public List<enquiry> showAllEnquiries() {
-    List<enquiry> enquiryList = enqrepo.findAll();
-    return enquiryList;
+  @ResponseBody
+  @RequestMapping(value = "/enquiries", method = RequestMethod.GET)
+  public List<enquiry> showAllEnq(){
+
+      List<enquiry> list = enqrepo.findAll();
+          
+      return list;
   }
+
 
   @RequestMapping(value = "/addEnquiry", method = RequestMethod.POST)
   public String submit(@Valid @ModelAttribute("clientmodel") clientModel clientmodel, BindingResult result,
