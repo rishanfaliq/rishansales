@@ -23,6 +23,7 @@ public interface enquiryRepo extends CrudRepository<enquiry, String> {
      @Query("SELECT o FROM enquiry o WHERE o.order_status = 'confirmed'")
      List<enquiry> findConfirmed();
 
+     
      @Query("SELECT o.client_name FROM enquiry o WHERE o.cid=:#{#cid}")
      String findCustomer(@Param("cid") clients cid);
 

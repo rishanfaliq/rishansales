@@ -33,7 +33,7 @@ public class returnProductsController{
     returnsRepo rerepo;
 
     @Autowired
-    itemRepo itemrepo;
+    productrepo itemrepo;
 
     @Autowired
     deliveryRepo delrepo;
@@ -117,9 +117,26 @@ public class returnProductsController{
         return model;
     }
     
+    @ResponseBody
+    @RequestMapping(value = "/viewReturnsRepairs", method = RequestMethod.GET)
+    public List<returns>  returnRepairs() {
 
+       
+        List<returns> list = rerepo.getAllRepairs();
 
+        return list;
+    }
+    
+    @ResponseBody
+    @RequestMapping(value = "/viewReturnsExchange", method = RequestMethod.GET)
+    public List<returns>  returnExchange() {
 
+       
+        List<returns> list = rerepo.getAllExchange();
+
+        return list;
+    }
+    
 
 
     @ModelAttribute("orderList")
@@ -145,11 +162,11 @@ public Map<String, String> getPorductList() {
   
   Map<String, String> productList = new HashMap<String, String>();
  
- List<items> ilist = itemrepo.findAll();
+ List<product> ilist = itemrepo.findAll();
 
- for (items var : ilist) {
+ for (product var : ilist) {
 
-  productList.put(var.getProduct_name(), var.getProduct_name());
+  productList.put(var.getLabel(), var.getLabel());
    
  }
 
@@ -196,6 +213,9 @@ private Date getDate() {
           
       return list;
   }
+
+
+  
 
   
 }

@@ -51,7 +51,7 @@ public class enquiryController {
   int saved_id;
 
   @Autowired
-  itemRepo itemrepo;
+  productrepo itemrepo;
 
   @Autowired
   userRepo userrepo;
@@ -138,28 +138,27 @@ public class enquiryController {
       return "error";
     }
 
-    String theUrl = "https://eirls-mm.herokuapp.com/api/items-raw";
-    String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleHRlcm5hbCIsImlhdCI6MTU1NTMyNjk2OSwiZXhwIjoxNTU1NDEzMzY5fQ.kDnlreG8p_VcoLh3FVrZI3a8go4IXQCWHBMIGJxNOaMeKsrhPz-Axv3RWiXgsxbQNXmXc4HTx7IQ9622Z20RZw";
+    String theUrl = "https://materialmanagementapi.herokuapp.com/assets/php/addproducts.php?term=thaali&fbclid=IwAR0ttYbW8F0mbuYkw8pNjxMBgBmorSGAJpv630SUT7d7oGxyv9Zsvtny-hg";
+    // String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleHRlcm5hbCIsImlhdCI6MTU1NTMyNjk2OSwiZXhwIjoxNTU1NDEzMzY5fQ.kDnlreG8p_VcoLh3FVrZI3a8go4IXQCWHBMIGJxNOaMeKsrhPz-Axv3RWiXgsxbQNXmXc4HTx7IQ9622Z20RZw";
     RestTemplate restTemplate = new RestTemplate();
 
     try {
 
       HttpHeaders headers = new HttpHeaders();
       headers.setContentType(MediaType.APPLICATION_JSON);
-      headers.add("Authorization", "Bearer " + token);
+      // headers.add("Authorization", "Bearer " + token);
 
       HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
 
-      ResponseEntity<MaterialDetails[]> respEntity = restTemplate.exchange(theUrl, HttpMethod.GET, entity,
-          MaterialDetails[].class);
-      List<orderitems> orderitemslist = ordrepo.pendings();
+      ResponseEntity<product[]> respEntity = restTemplate.exchange(theUrl, HttpMethod.GET, entity,
+      product[].class);
+ 
+      product[] resp = respEntity.getBody();
+      for (product var : resp) {
 
-      MaterialDetails[] resp = respEntity.getBody();
-      for (MaterialDetails var : resp) {
+        if (var.getLabel().equals(enquiryplace.getProductname())) {
 
-        if (var.getName().equals(enquiryplace.getProductname())) {
-
-          if (var.getQuantity() >= enquiryplace.getQuantity()) {
+          if (var.getAvailable() >= enquiryplace.getQuantity()) {
 
             orderitems ord = new orderitems();
 
@@ -273,11 +272,11 @@ public class enquiryController {
 
     Map<String, String> productList = new HashMap<String, String>();
 
-    List<items> ilist = itemrepo.findAll();
+    List<product> ilist = itemrepo.findAll();
 
-    for (items var : ilist) {
+    for (product var : ilist) {
 
-      productList.put(var.getProduct_name(), var.getProduct_name());
+      productList.put(var.getLabel(), var.getLabel());
 
     }
 

@@ -52,8 +52,9 @@ public class placeOrderController {
     @Autowired
     courierRepo crepo;
 
+ 
     @Autowired
-    itemRepo irepo;
+    orderitemsRepo oirepo;
     
 
 
@@ -238,6 +239,16 @@ public class placeOrderController {
     }
 
 
+    
+    @ResponseBody
+    @RequestMapping(value = "/ocancelled", method = RequestMethod.GET)
+    public List<orderitems> apiOcancelled(){
+
+     
+        List<orderitems> list = ordrepo.cancelledOrders();
+ 
+        return list;
+    }
 
 
     @RequestMapping(value = "/selectOrder", method = RequestMethod.GET)
@@ -336,15 +347,17 @@ if(i == 0){
     }
 
     
-    @ResponseBody
-    @RequestMapping(value = "/materialOrder", method = RequestMethod.GET)
+     @RequestMapping(value = "/materialOrder", method = RequestMethod.GET)
     public List<enquiry> materialOrd(){
 
         List<enquiry> list = enqrepo.findConfirmed();
             
         return list;
     }
-
+ 
+    
+     
+ 
 
     @ModelAttribute("confirmedOrderList")
     public Map<String, String> getConfirmedOrderList() {
