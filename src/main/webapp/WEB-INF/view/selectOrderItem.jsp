@@ -139,8 +139,7 @@ input[type=submit] {
 
  <div class="layout">
             <div class="main">
-
-<p> Enter details to place enquiry</p>
+ 
 <form:form method="POST"
           action="/showOrderItems" modelAttribute="deliverymodel">
 <table>

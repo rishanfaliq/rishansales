@@ -83,7 +83,10 @@ public class enquiryController {
                     return "error";
                   }
 
-                  String theUrl = "http://192.168.8.128:8181/assets/php/addproducts.php?term=?";
+                  // String theUrl = "http://192.168.8.128:8181/assets/php/addproducts.php?term=?";
+                  String theUrl = "https://api.myjson.com/bins/qokkd";
+
+                  
                   RestTemplate restTemplate = new RestTemplate();
 
                   try {
@@ -99,65 +102,37 @@ public class enquiryController {
 
                         if (var.getRequest_qty() >= enquiryplace.getQuantity()) {
 
-                          orderitems ord = new orderitems();
-                          ord.setMaterial_order_id(var.getId());
-                          ord.setProduct_name(enquiryplace.getProductname());
-                          ord.setProduct_quantity(enquiryplace.getQuantity());
-                          ord.setProduct_status("Available");
-                          ord.setProduct_type("Raw Material");
+                          if(var.getType() == 1) {
 
-                          orderitems o = ordrepo.save(ord);
-                          itemArrray.add(o.getOrderitems_id());
+                            orderitems ord = new orderitems();
+                            ord.setMaterial_order_id(var.getId());
+                            ord.setProduct_name(enquiryplace.getProductname());
+                            ord.setProduct_quantity(enquiryplace.getQuantity());
+                            ord.setProduct_status("Available");
+                            ord.setProduct_type("Raw Material");
+  
+                            orderitems o = ordrepo.save(ord);
+                            itemArrray.add(o.getOrderitems_id());
+                          }else {
+                            
+                            orderitems ord = new orderitems();
+                            ord.setMaterial_order_id(var.getId());
+                            ord.setProduct_name(enquiryplace.getProductname());
+                            ord.setProduct_quantity(enquiryplace.getQuantity());
+                            ord.setProduct_status("Available");
+                            ord.setProduct_type("Finished Goods");
+  
+                            orderitems o = ordrepo.save(ord);
+                            itemArrray.add(o.getOrderitems_id());
+                          }
+                          
 
-                          return "redirect:/enquiryPlace";
+                          return "redirect:/placeEnquiry";
                         }
-                      }
-                    }
-                  } catch (Exception eek) {
-                    System.out.println("** Exception: " + eek.getMessage());
-                  }
+                        else {
 
-                  String theUrl2 = "http://192.168.8.128:8181/assets/php/addproducts.php?term=?";
-                
-                  RestTemplate restTemplates = new RestTemplate();
-
-                  try {
-
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-              
-
-                    HttpEntity<String> entities = new HttpEntity<String>("parameters", headers);
-
-                    ResponseEntity<MaterialDetails[]> respEntity2 = restTemplates.exchange(theUrl2, HttpMethod.GET, entities,
-                        MaterialDetails[].class);
-                    // List<orderitems> orderitemslist = ordrepo.pendings();
-
-                    MaterialDetails[] resp = respEntity2.getBody();
-                    for (MaterialDetails var : resp) {
-
-                      if (var.getName().equals(enquiryplace.getProductname())) {
-
-                        if (var.getQuantity() >= enquiryplace.getQuantity()) {
-
+                          if(var.getType() != 1) {
                           orderitems ord = new orderitems();
-
-                          ord.setMaterial_order_id(var.getId());
-                          ord.setProduct_name(enquiryplace.getProductname());
-                          ord.setProduct_quantity(enquiryplace.getQuantity());
-                          ord.setProduct_status("Available");
-                          ord.setProduct_type("Finished Good");
-
-                          orderitems o = ordrepo.save(ord);
-
-                          itemArrray.add(o.getOrderitems_id());
-
-                          return "redirect:/enquiryPlace";
-
-                        } else {
-
-                          orderitems ord = new orderitems();
-
                           ord.setMaterial_order_id(var.getId());
                           ord.setProduct_name(enquiryplace.getProductname());
                           ord.setProduct_quantity(enquiryplace.getQuantity());
@@ -165,20 +140,16 @@ public class enquiryController {
                           ord.setProduct_type("Finished Good");
 
                           orderitems o = ordrepo.save(ord);
-
                           itemArrray.add(o.getOrderitems_id());
-
-                          return "redirect:/enquiryPlace";
-
                         }
-
+                        }
                       }
-
                     }
-
                   } catch (Exception eek) {
                     System.out.println("** Exception: " + eek.getMessage());
                   }
+
+                 
 
                   return "redirect:/enquiryPlaceFailed";
                 }
