@@ -70,7 +70,7 @@ public class returnProductsController{
 
                 for (orderitems var : oItemList) {
                     if(var.getProduct_name().equals(enquiryplace.getProductname())){
-                            if(var.getProduct_quantity() > enquiryplace.getQuantity()){
+                            if(var.getProduct_quantity() >= enquiryplace.getQuantity()){
 
                                 rtn.setProduct_name(enquiryplace.getProductname());
                                 rtn.setOrderid(e);

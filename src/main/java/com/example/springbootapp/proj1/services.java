@@ -66,7 +66,7 @@ public class services {
       return list;
     }
 
-
+    @ResponseBody 
     @RequestMapping(value = "/materialOrder", method = RequestMethod.GET)
     public List<enquiry> confirmedMaterial() {
 
