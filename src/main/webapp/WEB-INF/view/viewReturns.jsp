@@ -9,7 +9,6 @@
 </head>
 <style>
 
-
 .main{
   
     font-family: "Arial";
@@ -63,36 +62,12 @@ button:hover{
 .flow {
     min-height: 700px;
     width:1000px;
+    margin-top: 20px;
   left:15%;
     position:absolute;
     background-color:white;
 }
-
-table {
  
-  border-collapse: collapse;
- width: 90%;
-}
-
-th {
-    height: 30px;
-    
-}
-
-th, td {
-    text-align: left;
-    padding: 8px;
-     border:2px groove purple;
-}
-
-tr{
-    background-color:white;
-}
-
-th {
-    background-color:purple;
-    color: white;
-}
 
 .bordermain{
     left:30px;
@@ -101,11 +76,85 @@ th {
     
 }
 
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: black;
+    color:white;
+    font-style: bold;
+}
+tr:hover {background-color: #f5f5f5;}
+
+tr:nth-child(even) {background-color: #f2f2f2;}
 
 
+.clickbtn {
+  display: inline-block;
+  border-radius: 4px;
+  background-color: black;
+  border: none;
+  color: #FFFFFF;
+  height: 30px;
+  text-align: center;
+  font-size: 13px;
+  padding: 20px;
+  width: 150px;
+  transition: all 0.5s;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.clickbtn span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.clickbtn span:after {
+  content: '\00bb';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+
+.clickbtn:hover  {
+  background-color: red;
+  
+}
 
 
+.clickbtn:hover span {
+  padding-right: 25px;
+  
+}
 
+.clickbtn:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+input[type=text] {
+  border: none;
+  border-bottom: 2px solid black;
+}
+select {
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  border-radius: 4px;
+  background-color: #f1f1f1;
+}
 
 </style>
 <body>

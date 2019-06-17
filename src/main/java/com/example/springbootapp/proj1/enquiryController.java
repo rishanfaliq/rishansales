@@ -54,6 +54,9 @@ public class enquiryController {
   productrepo itemrepo;
 
   @Autowired
+  itemRepo iRepo;
+
+  @Autowired
   userRepo userrepo;
 
   @Autowired
@@ -62,260 +65,243 @@ public class enquiryController {
   @Autowired
   orderitemsRepo ordrepo;
 
-  @RequestMapping(value = "/enquiry", method = RequestMethod.GET)
-  public ModelAndView showForm() {
-    return new ModelAndView("enquiryView", "clientmodel", new clientModel());
+  //Place enquiry
 
-  }
+                @RequestMapping(value = "/placeEnquiry", method = RequestMethod.GET)
+                public ModelAndView displayEnquiries() {
 
-  @ResponseBody
-  @RequestMapping(value = "/enquiries", method = RequestMethod.GET)
-  public List<enquiry> showAllEnq(){
+                  return new ModelAndView("enquiryAdd", "enquiryplace", new enquiryPlace());
+                }
 
-      List<enquiry> list = enqrepo.findAll();
-          
-      return list;
-  }
+                
+                @RequestMapping(value = "/placeEnquiries", method = RequestMethod.POST)
+                public String placeEnquiry(@Valid @ModelAttribute("enquiryplace") enquiryPlace enquiryplace, BindingResult result,
+                    ModelMap model) {
+
+                  if (result.hasErrors()) {
+
+                    return "error";
+                  }
+
+                  String theUrl = "http://192.168.8.128:8181/assets/php/addproducts.php?term=?";
+                  RestTemplate restTemplate = new RestTemplate();
+
+                  try {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                    HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
+                    ResponseEntity<product[]> respEntity = restTemplate.exchange(theUrl, HttpMethod.GET, entity, product[].class);
+
+                    product[] resp = respEntity.getBody();
+                    for (product var : resp) {
+
+                      if (var.getText_box().equals(enquiryplace.getProductname())) {
+
+                        if (var.getRequest_qty() >= enquiryplace.getQuantity()) {
+
+                          orderitems ord = new orderitems();
+                          ord.setMaterial_order_id(var.getId());
+                          ord.setProduct_name(enquiryplace.getProductname());
+                          ord.setProduct_quantity(enquiryplace.getQuantity());
+                          ord.setProduct_status("Available");
+                          ord.setProduct_type("Raw Material");
+
+                          orderitems o = ordrepo.save(ord);
+                          itemArrray.add(o.getOrderitems_id());
+
+                          return "redirect:/enquiryPlace";
+                        }
+                      }
+                    }
+                  } catch (Exception eek) {
+                    System.out.println("** Exception: " + eek.getMessage());
+                  }
+
+                  String theUrl2 = "http://192.168.8.128:8181/assets/php/addproducts.php?term=?";
+                
+                  RestTemplate restTemplates = new RestTemplate();
+
+                  try {
+
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+              
+
+                    HttpEntity<String> entities = new HttpEntity<String>("parameters", headers);
+
+                    ResponseEntity<MaterialDetails[]> respEntity2 = restTemplates.exchange(theUrl2, HttpMethod.GET, entities,
+                        MaterialDetails[].class);
+                    // List<orderitems> orderitemslist = ordrepo.pendings();
+
+                    MaterialDetails[] resp = respEntity2.getBody();
+                    for (MaterialDetails var : resp) {
+
+                      if (var.getName().equals(enquiryplace.getProductname())) {
+
+                        if (var.getQuantity() >= enquiryplace.getQuantity()) {
+
+                          orderitems ord = new orderitems();
+
+                          ord.setMaterial_order_id(var.getId());
+                          ord.setProduct_name(enquiryplace.getProductname());
+                          ord.setProduct_quantity(enquiryplace.getQuantity());
+                          ord.setProduct_status("Available");
+                          ord.setProduct_type("Finished Good");
+
+                          orderitems o = ordrepo.save(ord);
+
+                          itemArrray.add(o.getOrderitems_id());
+
+                          return "redirect:/enquiryPlace";
+
+                        } else {
+
+                          orderitems ord = new orderitems();
+
+                          ord.setMaterial_order_id(var.getId());
+                          ord.setProduct_name(enquiryplace.getProductname());
+                          ord.setProduct_quantity(enquiryplace.getQuantity());
+                          ord.setProduct_status("Production");
+                          ord.setProduct_type("Finished Good");
+
+                          orderitems o = ordrepo.save(ord);
+
+                          itemArrray.add(o.getOrderitems_id());
+
+                          return "redirect:/enquiryPlace";
+
+                        }
+
+                      }
+
+                    }
+
+                  } catch (Exception eek) {
+                    System.out.println("** Exception: " + eek.getMessage());
+                  }
+
+                  return "redirect:/enquiryPlaceFailed";
+                }
 
 
-  @RequestMapping(value = "/addEnquiry", method = RequestMethod.POST)
-  public String submit(@Valid @ModelAttribute("clientmodel") clientModel clientmodel, BindingResult result,
-      ModelMap model) {
-    if (result.hasErrors()) {
-      return "error";
-    }
+ // Place enquiry on continue     
+
+                    @RequestMapping(value = "/enquiry", method = RequestMethod.GET)
+                    public ModelAndView showForm() {
+                      return new ModelAndView("enquiryView", "clientmodel", new clientModel());
+
+                    }
 
 
-    String s = "pending";
-    Date now = getDate();
-   
 
-    clients c = userrepo.getclient(Integer.parseInt(clientmodel.getId()));
+                    @RequestMapping(value = "/addEnquiry", method = RequestMethod.POST)
+                    public String addEnquiry(@Valid @ModelAttribute("clientmodel") clientModel clientmodel, BindingResult result,
+                        ModelMap model) {
 
-    // String name = enqrepo.findCustomer(c);
+                      if (result.hasErrors()) {
+                        return "error";
+                      }
+                      String s = "pending";
+                      Date now = getDate();
 
-    enquiry enq = new enquiry();
+                      clients c = userrepo.getclient(Integer.parseInt(clientmodel.getId()));
+                      enquiry enq = new enquiry();
+                      enq.setCid(c);
+                      enq.setDate_placed(now);
+                      enq.setClient_name(c.getClient_name());
+                      enq.setDue_date(clientmodel.getAddress());
+                      enq.setClient_order_id(clientmodel.getTradingname());
+                      enq.setOrder_status(s);
+                      enquiry e = enqrepo.save(enq);
 
-    enq.setCid(c);
-    enq.setDate_placed(now);
-    enq.setClient_name(c.getClient_name());
-    enq.setDue_date(clientmodel.getAddress());
-    enq.setClient_order_id(clientmodel.getTradingname());
+                      for (int var : itemArrray) {
+                        ordrepo.updateItem(e, var);
+                      }
 
-    enq.setOrder_status(s);
+                      itemArrray.clear();
 
-    // enqrepo.updateOrder(s, now, enquiryplace.getClientname(),
-    // enquiryplace.getDate(), saved_id);
-    enquiry e = enqrepo.save(enq);
+                      if (c.getClient_status().equals("Invalid")) {
+                        enqrepo.delete(e);
+                      }
 
-    for (int var : itemArrray) {
-
-      ordrepo.updateItem(e, var);
-
-    }
-
-    itemArrray.clear();
-
-    if (c.getClient_status().equals("Invalid")) {
-
-      enqrepo.delete(e);
-
-    }
-
-    return "redirect:/showEnquiry";
-  }
-  @RequestMapping(value = "/enquiryPlace", method = RequestMethod.GET)
-  public ModelAndView displayEnquiries() {
-
-    return new ModelAndView("enquiryAdd", "enquiryplace", new enquiryPlace());
-  }
-
-  @RequestMapping(value = "/placeEnquiries", method = RequestMethod.POST)
-  public String placeEnquiry(@Valid @ModelAttribute("enquiryplace") enquiryPlace enquiryplace, BindingResult result,
-      ModelMap model) {
-    if (result.hasErrors()) {
-
-      return "error";
-    }
-
-    String theUrl = "https://materialmanagementapi.herokuapp.com/assets/php/addproducts.php?term=thaali&fbclid=IwAR0ttYbW8F0mbuYkw8pNjxMBgBmorSGAJpv630SUT7d7oGxyv9Zsvtny-hg";
-    // String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleHRlcm5hbCIsImlhdCI6MTU1NTMyNjk2OSwiZXhwIjoxNTU1NDEzMzY5fQ.kDnlreG8p_VcoLh3FVrZI3a8go4IXQCWHBMIGJxNOaMeKsrhPz-Axv3RWiXgsxbQNXmXc4HTx7IQ9622Z20RZw";
-    RestTemplate restTemplate = new RestTemplate();
-
-    try {
-
-      HttpHeaders headers = new HttpHeaders();
-      headers.setContentType(MediaType.APPLICATION_JSON);
-      // headers.add("Authorization", "Bearer " + token);
-
-      HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
-
-      ResponseEntity<product[]> respEntity = restTemplate.exchange(theUrl, HttpMethod.GET, entity,
-      product[].class);
+                      return "redirect:/showEnquiry";
+                    }
  
-      product[] resp = respEntity.getBody();
-      for (product var : resp) {
+  //Failed           
+                      @RequestMapping(value = "/enquiryPlaceFailed", method = RequestMethod.GET)
+                      public ModelAndView productAdderfailed() {
+                        return new ModelAndView("enquiryFailed", "enquiryplace", new enquiryPlace());
+                      }
 
-        if (var.getLabel().equals(enquiryplace.getProductname())) {
+  //List of products 
 
-          if (var.getAvailable() >= enquiryplace.getQuantity()) {
+                      @ModelAttribute("productList")
+                      public Map<String, String> getPorductList() {
 
-            orderitems ord = new orderitems();
+                        Map<String, String> productList = new HashMap<String, String>();
 
-            ord.setMaterial_order_id(var.getId());
-            ord.setProduct_name(enquiryplace.getProductname());
-            ord.setProduct_quantity(enquiryplace.getQuantity());
-            ord.setProduct_status("Available");
+                        List<items> ilist = iRepo.findAll();
 
-            ord.setProduct_type("Raw Material");
+                        for (items var : ilist) {
 
-            orderitems o = ordrepo.save(ord);
+                          productList.put(var.getProductname(), var.getProductname());
 
-            itemArrray.add(o.getOrderitems_id());
+                        }
 
-            return "redirect:/enquiryPlace";
+                        return productList;
+                      }
 
-          }
+ //List of users 
+                          
+                      @ModelAttribute("userList")
+                      public Map<String, String> getUserList() {
 
-        }
+                        Map<String, String> userList = new HashMap<String, String>();
 
-      }
+                        List<clients> ilist = userrepo.findAll();
 
-    } catch (Exception eek) {
-      System.out.println("** Exception: " + eek.getMessage());
-    }
+                        for (clients var : ilist) {
 
-    String theUrl2 = "https://eirls-mm.herokuapp.com/api/items-complete";
-    String token2 = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleHRlcm5hbCIsImlhdCI6MTU1NTMyNjk2OSwiZXhwIjoxNTU1NDEzMzY5fQ.kDnlreG8p_VcoLh3FVrZI3a8go4IXQCWHBMIGJxNOaMeKsrhPz-Axv3RWiXgsxbQNXmXc4HTx7IQ9622Z20RZw";
-    RestTemplate restTemplates = new RestTemplate();
+                          userList.put(String.valueOf(var.getClient_id()), String.valueOf(var.getClient_id()));
 
-    try {
+                        }
 
-      HttpHeaders headers = new HttpHeaders();
-      headers.setContentType(MediaType.APPLICATION_JSON);
-      headers.add("Authorization", "Bearer " + token2);
-
-      HttpEntity<String> entities = new HttpEntity<String>("parameters", headers);
-
-      ResponseEntity<MaterialDetails[]> respEntity2 = restTemplates.exchange(theUrl2, HttpMethod.GET, entities,
-          MaterialDetails[].class);
-      List<orderitems> orderitemslist = ordrepo.pendings();
-
-      MaterialDetails[] resp = respEntity2.getBody();
-      for (MaterialDetails var : resp) {
-
-        if (var.getName().equals(enquiryplace.getProductname())) {
-
-          if (var.getQuantity() >= enquiryplace.getQuantity()) {
-
-            orderitems ord = new orderitems();
-
-            ord.setMaterial_order_id(var.getId());
-            ord.setProduct_name(enquiryplace.getProductname());
-            ord.setProduct_quantity(enquiryplace.getQuantity());
-            ord.setProduct_status("Available");
-            ord.setProduct_type("Finished Good");
-
-            orderitems o = ordrepo.save(ord);
-
-            itemArrray.add(o.getOrderitems_id());
-
-            return "redirect:/enquiryPlace";
-
-          }else{
-
-            orderitems ord = new orderitems();
-
-            ord.setMaterial_order_id(var.getId());
-            ord.setProduct_name(enquiryplace.getProductname());
-            ord.setProduct_quantity(enquiryplace.getQuantity());
-            ord.setProduct_status("Production");
-            ord.setProduct_type("Finished Good");
-
-            orderitems o = ordrepo.save(ord);
-
-            itemArrray.add(o.getOrderitems_id());
-
-            return "redirect:/enquiryPlace";
+                        return userList;
+                      }
+//view eqnuiries
+                      @RequestMapping(value = "/showEnquiry", method = RequestMethod.GET)
+                      public ModelAndView showForm(ModelAndView model) throws ParseException {
+                  
+                          Date now = getDate();
+                  
+                          List<enquiry> plist = enqrepo.findPending();
+                          List<orderitems> list = ordrepo.pendings();
+                  
+                          model.addObject("list", list);
+                          model.setViewName("placeOrder");
+                  
+                          return model;
+                  
+                      }
 
 
+                      private Date getDate() {
 
+                        Date date = new Date();
 
+                        DateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+                        // df.setTimeZone(TimeZone.getTimeZone("Asia/Colombo"));
 
+                        String strDate = df.format(date);
 
-          }
+                        Date newDate = null;
+                        try {
+                          newDate = df.parse(strDate);
+                        } catch (ParseException e) {
+                          e.printStackTrace();
+                        }
 
-        }
-
-      }
-
-    } catch (Exception eek) {
-      System.out.println("** Exception: " + eek.getMessage());
-    }
-
-    return "redirect:/enquiryPlaceFailed";
-  }
-
-  // @RequestMapping(value="enq", method= RequestMethod.POST)
-  // public void placeEnq(User user){
-  // //user object will automatically be populated with values sent from browser
-  // or jsp page. Provide your authentication logic here
-  // }
-
-  @RequestMapping(value = "/enquiryPlaceFailed", method = RequestMethod.GET)
-  public ModelAndView productAdderfailed() {
-    return new ModelAndView("enquiryFailed", "enquiryplace", new enquiryPlace());
-  }
-
-  @ModelAttribute("productList")
-  public Map<String, String> getPorductList() {
-
-    Map<String, String> productList = new HashMap<String, String>();
-
-    List<product> ilist = itemrepo.findAll();
-
-    for (product var : ilist) {
-
-      productList.put(var.getLabel(), var.getLabel());
-
-    }
-
-    return productList;
-  }
-
-  @ModelAttribute("userList")
-  public Map<String, String> getUserList() {
-
-    Map<String, String> userList = new HashMap<String, String>();
-
-    List<clients> ilist = userrepo.findAll();
-
-    for (clients var : ilist) {
-
-      userList.put(String.valueOf(var.getClient_id()), String.valueOf(var.getClient_id()));
-
-    }
-
-    return userList;
-  }
-
-  private Date getDate() {
-
-    Date date = new Date();
-
-    DateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
-    // df.setTimeZone(TimeZone.getTimeZone("Asia/Colombo"));
-
-    String strDate = df.format(date);
-
-    Date newDate = null;
-    try {
-      newDate = df.parse(strDate);
-    } catch (ParseException e) {
-      e.printStackTrace();
-    }
-
-    return newDate;
-  }
+                        return newDate;
+                      }
 
 }

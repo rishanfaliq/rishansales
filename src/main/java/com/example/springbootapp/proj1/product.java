@@ -25,28 +25,33 @@ public class product {
     }
 
  
-    @Column(name= "label")
-    private String label;
+    @Column(name= "text_box")
+    private String text_box;
 
-    public String getLabel() {
-        return this.label;
+
+    public String getText_box() {
+    	return this.text_box;
     }
-    public void setLabel(String label) {
-        this.label = label;
+    public void setText_box(String text_box) {
+    	this.text_box = text_box;
     }
+
+    
 
 
  
-    @Column(name= "available")
-    private float available;
+    @Column(name= "request_qty")
+    private int request_qty;
 
-    public float getAvailable() {
-        return this.available;
+
+    public int getRequest_qty() {
+    	return this.request_qty;
     }
-    public void setAvailable(float available) {
-        this.available = available;
+    public void setRequest_qty(int request_qty) {
+    	this.request_qty = request_qty;
     }
 
+     
     
     
 

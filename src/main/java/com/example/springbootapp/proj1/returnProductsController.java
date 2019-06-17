@@ -38,12 +38,13 @@ public class returnProductsController{
     @Autowired
     deliveryRepo delrepo;
 
-    @RequestMapping(value = "/returnItems", method = RequestMethod.GET)
+    @Autowired
+    itemRepo irepo;
+
+  @RequestMapping(value = "/returnItems", method = RequestMethod.GET)
     public ModelAndView showForm() {
-        return new ModelAndView("returnItemsOne", "enquiryplace", new enquiryPlace());
-
-
-    }
+        return new ModelAndView("returnItemsOne", "enquiryplace", new enquiryPlace()); 
+       }
 
 
     @RequestMapping(value = "/returnItemsError", method = RequestMethod.GET)
@@ -59,49 +60,35 @@ public class returnProductsController{
         @RequestMapping(value = "/returns", method = RequestMethod.POST)
         public String saveReturns(@Valid @ModelAttribute("enquiryplace") enquiryPlace enquiryplace, 
           BindingResult result, ModelMap model) {
-            if (result.hasErrors()) {
-           
-                return "error";
-            }   
+ 
+            Date now = getDate(); 
+            int orderid = Integer.parseInt(enquiryplace.getIdentity());
 
-            Date now = getDate();
+            List<orderitems> oItemList = ordrep.getItems(orderid);
+            enquiry e = enqrepo.getEnquiry(orderid);
+            returns rtn = new returns();
 
-           int orderid = Integer.parseInt(enquiryplace.getIdentity());
+                for (orderitems var : oItemList) {
+                    if(var.getProduct_name().equals(enquiryplace.getProductname())){
+                            if(var.getProduct_quantity() > enquiryplace.getQuantity()){
 
-           List<orderitems> orditemsList = ordrep.getItems(orderid);
-           enquiry e = enqrepo.getEnquiry(orderid);
-          returns rtn = new returns();
+                                rtn.setProduct_name(enquiryplace.getProductname());
+                                rtn.setOrderid(e);
+                                rtn.setProduct_quantity(enquiryplace.getQuantity());
+                                rtn.setDescription(enquiryplace.getDescription());
+                                rtn.setReturn_location(enquiryplace.getLocation());
+                                rtn.setReturn_type(enquiryplace.getReturntype());
+                                rtn.setReturn_date(now);
 
-           for (orderitems var : orditemsList) {
-               if(var.getProduct_name().equals(enquiryplace.getProductname())){
-                    if(var.getProduct_quantity() > enquiryplace.getQuantity()){
+                                rerepo.save(rtn);
+ 
+                                return "index";
 
-                        rtn.setProduct_name(enquiryplace.getProductname());
-                        rtn.setOrderid(e);
-                        rtn.setProduct_quantity(enquiryplace.getQuantity());
-                        rtn.setDescription(enquiryplace.getDescription());
-                        rtn.setReturn_location(enquiryplace.getLocation());
-                        rtn.setReturn_type(enquiryplace.getReturntype());
-                        rtn.setReturn_date(now);
-
-                        rerepo.save(rtn);
-
-                      
-
-                        return "index";
+                            }
 
                     }
-
-               }
-           }
-
-
-            
-           
- 
-       
-
-           return "redirect:/returnItemsError";
+                }
+        return "redirect:/returnItemsError";
     }
 
 
@@ -117,26 +104,7 @@ public class returnProductsController{
         return model;
     }
     
-    @ResponseBody
-    @RequestMapping(value = "/viewReturnsRepairs", method = RequestMethod.GET)
-    public List<returns>  returnRepairs() {
-
-       
-        List<returns> list = rerepo.getAllRepairs();
-
-        return list;
-    }
-    
-    @ResponseBody
-    @RequestMapping(value = "/viewReturnsExchange", method = RequestMethod.GET)
-    public List<returns>  returnExchange() {
-
-       
-        List<returns> list = rerepo.getAllExchange();
-
-        return list;
-    }
-    
+   
 
 
     @ModelAttribute("orderList")
@@ -162,11 +130,11 @@ public Map<String, String> getPorductList() {
   
   Map<String, String> productList = new HashMap<String, String>();
  
- List<product> ilist = itemrepo.findAll();
+ List<items> ilist = irepo.findAll();
 
- for (product var : ilist) {
+ for (items var : ilist) {
 
-  productList.put(var.getLabel(), var.getLabel());
+  productList.put(var.getProductname(), var.getProductname());
    
  }
 
@@ -193,26 +161,6 @@ private Date getDate() {
     return newDate;
   }
 
-
-
-  
-  @ResponseBody
-  @RequestMapping(value = "/productionOrders", method = RequestMethod.GET)
-  public List<enquiry> productionOrders(){
-
-      List<enquiry> list = enqrepo.findAll();
-          
-      return list;
-  }
-
-  @ResponseBody
-  @RequestMapping(value = "/deliveryNotes", method = RequestMethod.GET)
-  public List<delivery> deliveryNotes(){
-
-      List<delivery> list = delrepo.findAll();
-          
-      return list;
-  }
 
 
   

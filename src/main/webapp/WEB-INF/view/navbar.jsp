@@ -7,20 +7,32 @@
 
     <style>
 
-.dropbtn {
-    background-color: gray;
+.dropbtn { 
     color: white;
     padding: 16px;
-    font-size: 16px;
+    font-size: 10px;
+    font-style: bold;
     border: none;
     cursor: pointer;
+      display: inline-block;
+    padding: 15px 25px;
+    font-size: 24px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    background-color: black;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 9px #999;
        
 }
 
 .dropbtn:hover{
-        background-color: white;
-     color:purple;
-     transition:0.5s;
+        background-color: grey;
+        
+     color:white; 
 }
 
 .dropdown {
@@ -38,6 +50,13 @@
     cursor: pointer
 }
 
+.dropbtn:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
+
+
 .dropdown-content a {
     color: black;
     padding: 12px 16px;
@@ -53,38 +72,51 @@
 }
 
 .dropdown:hover .dropbtn {
-    background-color: white;
-     color:purple;
-     transition:0.5s;
-     cursor: pointer
+   color: white;
+    padding: 16px;
+    font-size: 10px;
+    font-style: bold;
+    border: none;
+    cursor: pointer;
+      display: inline-block;
+    padding: 15px 25px;
+    font-size: 24px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    background-color: black;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 9px #999;
 }
 
-.NavBar{
-    border:3px solid black;
-        border-radius:1px;
-    background-color:gray;
+.NavBar{  
+    background-color:white;
+    color:black;
+    margin:20px;
 }
 .space{ 
-    width:900px;
+    width:450px;
     display:inline-block;
 
-
-
-
-
-}
+ 
+} 
     </style>
     
   
     <body>
     <div class="NavBar">
+    
+ <div class="space"></div>
     <a href="/home">    <button class="dropbtn">Home </button></a> 
             
             
  <div class="dropdown">
   <button class="dropbtn">Enquiry</button>
   <div class="dropdown-content">
-    <a href="/enquiryPlace">Place Enquiry</a>
+    <a href="/placeEnquiry">Place Enquiry</a>
     <a href="/showEnquiry">View Enquiries</a>
     </div>
     </div>
@@ -103,9 +135,8 @@
 
     <a href="/showDelivery">    <button class="dropbtn"> Deliveries </button></a> 
     
- <div class="space"></div>
   <div class="dropdown">
-  <button class="dropbtn">Client Settings</button>
+  <button class="dropbtn">Manage Clients</button>
   <div class="dropdown-content">
     <a href="/registerClient">Register Client</a>
     <a href="/manageAccount">Manage Clients</a>
@@ -116,5 +147,6 @@
           
      
       </div>
+      <hr /> 
     </body>
 </html>

@@ -52,90 +52,79 @@ public class placeOrderController {
     @Autowired
     courierRepo crepo;
 
- 
     @Autowired
     orderitemsRepo oirepo;
-    
-
 
     List<Integer> newlist = new ArrayList<>();
-
-   
-     
 
     @RequestMapping("/home")
     public String index() {
 
+        return "index";
+    }
+
     
+    @RequestMapping(value = "/deliveryDetails", method = RequestMethod.GET)
+    public ModelAndView viewPlaceOrder() {
+        return new ModelAndView("delivery", "deliverymodel", new deliveryModel());
+    }
 
 
+    @RequestMapping(value = "/confirmDelivery", method = RequestMethod.POST)
+    public String submit(@Valid @ModelAttribute("deliverymodel") deliveryModel deliverymodel, BindingResult result,
+            ModelMap model) {
+        if (result.hasErrors()) {
+            return "error";
+        }
 
+        delivery d = new delivery();
+        enquiry eq = enqrepo.getEnquiry(Integer.parseInt(deliverymodel.getIdentity()));
+
+        d.setDelivery_date(deliverymodel.getDuedate());
+        d.setDelivery_location(deliverymodel.getAddress());
+        d.setDelivery_type(deliverymodel.getDeliverytype());
+        d.setEq(eq);
+
+        int i = Integer.parseInt(deliverymodel.getCourier());
+
+        if (i == 0) {
+
+        } else {
+            courier cr = crepo.getCourier(Integer.parseInt(deliverymodel.getCourier()));
+            d.setDel(cr);
+        }
+
+        d.setDelivery_status("pending");
+        delrepo.save(d);
+
+        enqrepo.updateItem("confirmed", Integer.parseInt(deliverymodel.getIdentity()));
 
         return "index";
     }
 
+    @RequestMapping(value = "/showOrder", method = RequestMethod.GET)
+    public ModelAndView showForm2(ModelAndView model) throws ParseException {
 
-
-
-
-
-
-
-    @RequestMapping(value = "/showEnquiry", method = RequestMethod.GET)
-    public ModelAndView showForm(ModelAndView model) throws ParseException {
-
-     
-        // DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        // LocalDate localDate = LocalDate.now();
-
-   
-
-
-        Date now = getDate();
-        
-
-        
-        List<enquiry> plist = enqrepo.findPending();
-        List<orderitems> list = ordrepo.pendings();
-
-
-        
-
-        for (enquiry e : plist) {
-
-            Date date1 = e.getDate_placed();
-          
-
-
-            long diff = now.getTime() - date1.getTime();
-
-            long diffDays = diff / (24 * 60 * 60 * 1000);
-            long diffHours = diff / (60 * 60 * 1000) % 24;
-            long diffMinutes = diff / (60 * 1000);
-
-            System.out.println(diffMinutes);
-
-            System.out.println(diffHours);
-
-            System.out.println(diffDays);
-
-            
-
-        }
+        enquiry enq = new enquiry();
+        List<enquiry> list = enqrepo.findConfirmed();
 
         model.addObject("list", list);
-        model.setViewName("placeOrder");
+        model.setViewName("showOrder");
 
         return model;
-
     }
 
+    @RequestMapping(value = "/selectOrder", method = RequestMethod.GET)
+    public ModelAndView historyForm() {
+        return new ModelAndView("selectOrderItem", "deliverymodel", new deliveryModel());
+    }
 
-    @RequestMapping(value = "/confirmOrder", method = RequestMethod.POST)
+  
+
+    @RequestMapping(value = "/orderConfirmed", method = RequestMethod.POST)
     public String developerMethod(@RequestParam("myField") int id) {
 
         newlist.add(id);
-
         enqrepo.updateItem("confirmed", id);
 
         return "redirect:/showEnquiry";
@@ -148,7 +137,7 @@ public class placeOrderController {
 
         for (orderitems var : olist) {
             ordrepo.cancelItem("cancelled", var.getOrderitems_id());
-            
+
         }
 
         enqrepo.updateItem("cancelled", id);
@@ -166,70 +155,46 @@ public class placeOrderController {
 
     }
 
-
     @RequestMapping(value = "/cancelEnquiry", method = RequestMethod.POST)
     public String cancelEnquiry(@RequestParam("myField") int id) {
 
+        ordrepo.cancelItem("cancelled", id); 
 
-      
-
-
-        ordrepo.cancelItem("cancelled", id);
-
-        orderitems o = ordrepo.getOrderItem(id);
+        orderitems o = ordrepo.getOrderItem(id); 
 
         ArrayList<String> str = new ArrayList<>();
         List<orderitems> ord = ordrepo.getItems(o.getEnq().getOrder_id());
+
         boolean allMatch = true;
-       
-      for (orderitems var : ord) {
 
-        str.add(var.getProduct_status());
-          
-      }
+                                for (orderitems var : ord) {
 
-      for (String string : str) {
-        if (!string.equals("cancelled")) {
-            allMatch = false;
-            break;
-        }
+                                    str.add(var.getProduct_status());
 
-           
+                                }
 
-        
+                                for (String string : str) {
+                                    if (!string.equals("cancelled")) {
+                                        allMatch = false;
+                                        break;
+                                    }
 
-    }
+                                }
 
-    if(allMatch == true){
-        
-        enqrepo.deleteItem(o.getEnq().getOrder_id());
+                                if (allMatch == true) {
 
-    }
-      
-       
+                                    enqrepo.deleteItem(o.getEnq().getOrder_id());
+
+                                }
 
         return "redirect:/showEnquiry";
 
     }
 
 
-    @RequestMapping(value = "/showOrder", method = RequestMethod.GET)
-    public ModelAndView showForm2(ModelAndView model) throws ParseException {
-
-        enquiry enq = new enquiry();
-        List<enquiry> list = enqrepo.findConfirmed();
-
-        model.addObject("list", list);
-        model.setViewName("showOrder");
-
-        return model;
-    }
-
-
     @RequestMapping(value = "/cancelledOrders", method = RequestMethod.GET)
     public ModelAndView showCancelled(ModelAndView model) throws ParseException {
 
-     
         List<orderitems> list = ordrepo.cancelledOrders();
 
         model.addObject("list", list);
@@ -239,96 +204,27 @@ public class placeOrderController {
     }
 
 
-    
-    @ResponseBody
-    @RequestMapping(value = "/ocancelled", method = RequestMethod.GET)
-    public List<orderitems> apiOcancelled(){
-
-     
-        List<orderitems> list = ordrepo.cancelledOrders();
  
-        return list;
-    }
-
-
-    @RequestMapping(value = "/selectOrder", method = RequestMethod.GET)
-    public ModelAndView historyForm() {
-        return new ModelAndView("selectOrderItem", "deliverymodel", new deliveryModel());
-    }
-
+   
     @RequestMapping(value = "/showOrderItems", method = RequestMethod.POST)
-    public ModelAndView showHistory(@Valid @ModelAttribute("deliverymodel")deliveryModel deliverymodel, 
-      BindingResult result, ModelMap models, ModelAndView model) {
-      
+    public ModelAndView showHistory(@Valid @ModelAttribute("deliverymodel") deliveryModel deliverymodel,
+            BindingResult result, ModelMap models, ModelAndView model) {
+
         int results = Integer.parseInt(deliverymodel.getIdentity());
-       
+
         List<orderitems> list = ordrepo.getItems(results);
         model.addObject("list", list);
         model.setViewName("showOrderItems");
 
         return model;
-      
 
-          
-       
-
-       
     }
 
-
-    
-    @RequestMapping(value = "/deliveryDetails", method = RequestMethod.GET)
-    public ModelAndView viewPlaceOrder() {
-        return new ModelAndView("delivery", "deliverymodel", new deliveryModel());
-    }
-
-    @RequestMapping(value = "/confirmDelivery", method = RequestMethod.POST)
-    public String submit(@Valid @ModelAttribute("deliverymodel")deliveryModel deliverymodel, 
-      BindingResult result, ModelMap model) {
-        if (result.hasErrors()) {
-            return "error";
-        }
-
-        delivery d = new delivery();
-        enquiry eq = enqrepo.getEnquiry(Integer.parseInt(deliverymodel.getIdentity()));
-      
-
-
-        d.setDelivery_date(deliverymodel.getDuedate());
-        d.setDelivery_location(deliverymodel.getAddress());
-        d.setDelivery_type(deliverymodel.getDeliverytype());
-        d.setEq(eq);
-
-        int i = Integer.parseInt(deliverymodel.getCourier());
-
-if(i == 0){
-
-    
-}else{
-    courier cr = crepo.getCourier(Integer.parseInt(deliverymodel.getCourier()));
-    d.setDel(cr);
-}
-
-        
-        
-        
-        d.setDelivery_status("pending");
-        delrepo.save(d);
-               
-        enqrepo.updateItem("confirmed", Integer.parseInt(deliverymodel.getIdentity()));
-      
-
-          
-       
-
-        return "index";
-    }
 
 
     @RequestMapping(value = "/showDelivery", method = RequestMethod.GET)
     public ModelAndView showDelivery(ModelAndView model) throws ParseException {
 
-      
         List<delivery> list = delrepo.findAll();
 
         model.addObject("list", list);
@@ -337,107 +233,77 @@ if(i == 0){
         return model;
     }
 
-    @ResponseBody
-    @RequestMapping(value = "/materialEnquiry", method = RequestMethod.GET)
-    public List<enquiry> materialEnq(){
-
-        List<enquiry> list = enqrepo.findPending();
-            
-        return list;
-    }
-
-    
-     @RequestMapping(value = "/materialOrder", method = RequestMethod.GET)
-    public List<enquiry> materialOrd(){
-
-        List<enquiry> list = enqrepo.findConfirmed();
-            
-        return list;
-    }
- 
-    
-     
- 
 
     @ModelAttribute("confirmedOrderList")
     public Map<String, String> getConfirmedOrderList() {
-    
-      
-      Map<String, String> orderList = new HashMap<String, String>();
-     
-     List<orderitems> ilist = ordrepo.confirmedOrders();
-    
-     for (orderitems var : ilist) {
 
-        if(var.getProduct_status().equals("cancelled")){
+        Map<String, String> orderList = new HashMap<String, String>();
 
-        }else{
+        List<orderitems> ilist = ordrepo.confirmedOrders();
 
-            orderList.put(String.valueOf(var.getEnq().getOrder_id()), String.valueOf(var.getEnq().getOrder_id()));
+        for (orderitems var : ilist) {
+
+            if (var.getProduct_status().equals("cancelled")) {
+
+            } else {
+
+                orderList.put(String.valueOf(var.getEnq().getOrder_id()), String.valueOf(var.getEnq().getOrder_id()));
+            }
+
         }
 
-
-        
-        
-      
-       
-     }
-    
-    return orderList;
+        return orderList;
     }
 
-    
     @ModelAttribute("orderList")
     public Map<String, String> getOrderList() {
-    
-      
-      Map<String, String> orderList = new HashMap<String, String>();
-     
-     List<enquiry> ilist = enqrepo.findPending();
-    
-     for (enquiry var : ilist) {
-    
-        orderList.put(String.valueOf(var.getOrder_id()), String.valueOf(var.getOrder_id()));
-       
-     }
-    
-    return orderList;
+
+        Map<String, String> orderList = new HashMap<String, String>();
+
+        List<enquiry> ilist = enqrepo.findPending();
+
+        for (enquiry var : ilist) {
+
+            orderList.put(String.valueOf(var.getOrder_id()), String.valueOf(var.getOrder_id()));
+
+        }
+
+        return orderList;
     }
 
     @ModelAttribute("courierList")
     public Map<String, String> getCourier() {
-    
-      
-      Map<String, String> courierList = new HashMap<String, String>();
-     
-     List<courier> ilist = crepo.findAll();
-    
-     for (courier var : ilist) {
-    
-        courierList.put(String.valueOf(var.getCourier_id()), String.valueOf(var.getCourier_id()));
-       
-     }
-    
-    return courierList;
+
+        Map<String, String> courierList = new HashMap<String, String>();
+
+        List<courier> ilist = crepo.findAll();
+
+        for (courier var : ilist) {
+
+            courierList.put(String.valueOf(var.getCourier_id()), String.valueOf(var.getCourier_id()));
+
+        }
+
+        return courierList;
     }
 
     private Date getDate() {
 
         Date date = new Date();
-    
+
         DateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
         // df.setTimeZone(TimeZone.getTimeZone("Asia/Colombo"));
-    
+
         String strDate = df.format(date);
-    
+
         Date newDate = null;
         try {
-          newDate = df.parse(strDate);
+            newDate = df.parse(strDate);
         } catch (ParseException e) {
-          e.printStackTrace();
+            e.printStackTrace();
         }
-    
+
         return newDate;
-      }
+    }
 
 }
