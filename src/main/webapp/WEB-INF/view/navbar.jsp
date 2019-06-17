@@ -117,7 +117,8 @@
   <button class="dropbtn">Enquiry</button>
   <div class="dropdown-content">
     <a href="/placeEnquiry">Place Enquiry</a>
-    <a href="/showEnquiry">View Enquiries</a>
+    <a href="/selectEnqForOrderItem">View Enquiries</a>
+    <%-- showEnquiry --%>
     </div>
     </div>
             

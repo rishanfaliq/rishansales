@@ -119,7 +119,27 @@ public class placeOrderController {
         return new ModelAndView("selectOrderItem", "deliverymodel", new deliveryModel());
     }
 
-  
+
+
+    @RequestMapping(value = "/selectEnqForOrderItem", method = RequestMethod.GET)
+    public ModelAndView orderItemEnquirySelect() {
+        return new ModelAndView("inquiryItems", "deliverymodel", new deliveryModel());
+    }
+
+    @RequestMapping(value = "/showOrderItemsOfEnq", method = RequestMethod.POST)
+    public ModelAndView showEnqOitems(@Valid @ModelAttribute("deliverymodel") deliveryModel deliverymodel,
+            BindingResult result, ModelMap models, ModelAndView model) {
+
+        int results = Integer.parseInt(deliverymodel.getIdentity());
+
+        List<orderitems> list = ordrepo.getItems(results);
+        model.addObject("list", list);
+        model.setViewName("showOrderItems");
+
+        return model;
+
+    }
+
 
     @RequestMapping(value = "/orderConfirmed", method = RequestMethod.POST)
     public String developerMethod(@RequestParam("myField") int id) {
@@ -219,7 +239,8 @@ public class placeOrderController {
         return model;
 
     }
-
+    
+    
 
 
     @RequestMapping(value = "/showDelivery", method = RequestMethod.GET)
